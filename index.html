@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ja" translate="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>手取り計算ツール｜額面給与から手取りを無料で計算</title>
+  <meta name="description" content="年収・各種控除を入力して手取り額・税金・社会保険料を即座に計算。47都道府県対応・配偶者控除・iDeCo・住宅ローン控除など細かく設定可能。無料。">
+  <link rel="canonical" href="https://tedori-keisan.com/">
+  <meta property="og:title" content="手取り計算ツール">
+  <meta property="og:description" content="額面給与から手取り額を無料計算。都道府県・家族構成・各種控除に対応。">
+  <meta property="og:url" content="https://tedori-keisan.com/">
+  <meta property="og:type" content="website">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "手取り計算ツール",
+    "url": "https://tedori-keisan.com/",
+    "description": "年収・各種控除を入力して手取り額・税金・社会保険料を計算する無料ツール",
+    "applicationCategory": "FinanceApplication",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" }
+  }
+  </script>
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/common.css">
+  <style>
+    /* ── 入力パネル ── */
+    .input-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 20px; margin-bottom: 12px; }
+    .section-label { font-size: 11px; font-weight: 700; color: var(--text-light); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 12px; }
+    .field-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-mid); margin-bottom: 6px; }
+
+    /* トグルグループ */
+    .toggle-group { display: flex; background: var(--bg); border-radius: 10px; padding: 3px; gap: 2px; }
+    .toggle-btn { flex: 1; padding: 9px 8px; border-radius: 8px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; color: var(--text-light); background: transparent; transition: .15s; white-space: nowrap; }
+    .toggle-btn.active { background: var(--white); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+
+    /* 年収入力 */
+    .salary-input-wrap { position: relative; }
+    .salary-input-wrap input {
+      width: 100%; padding: 14px 52px 14px 18px;
+      font-size: 24px; font-family: 'DM Serif Display', serif; font-weight: 400;
+      color: var(--text); background: var(--white);
+      border: 2px solid var(--border); border-radius: 12px; outline: none;
+      transition: border-color .2s;
+    }
+    .salary-input-wrap input:focus { border-color: var(--green); }
+    .salary-input-wrap .unit { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 14px; color: var(--text-light); font-weight: 700; }
+
+    input[type="range"] {
+      -webkit-appearance: none; width: 100%; height: 5px; border-radius: 3px; outline: none; cursor: pointer; margin: 10px 0 4px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+      background: var(--text); cursor: pointer; border: 3px solid #fff; box-shadow: 0 1px 5px rgba(0,0,0,.2);
+    }
+    .slider-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-light); }
+
+    /* クイック選択 */
+    .quick-btns { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+    .quick-btn { padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid var(--border); background: var(--white); color: var(--text-mid); cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: .15s; }
+    .quick-btn:hover, .quick-btn.active { background: var(--green); border-color: var(--green); color: #fff; }
+
+    /* 月収入力グリッド */
+    .monthly-grid { display: none; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .monthly-note { grid-column: 1/-1; background: var(--bg); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--text-mid); }
+
+    /* カウンター */
+    .counter { display: flex; align-items: center; gap: 10px; }
+    .counter-btn { width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--white); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text); transition: .15s; }
+    .counter-btn:hover { border-color: var(--green); color: var(--green); }
+    .counter-val { font-size: 18px; font-weight: 700; min-width: 28px; text-align: center; }
+
+    /* チェックボックス */
+    .check-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--bg); }
+    .check-row:last-child { border-bottom: none; }
+    .check-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--green); cursor: pointer; }
+    .check-row label { font-size: 14px; cursor: pointer; }
+
+    /* 詳細控除トグル */
+    #advanced-toggle { width: 100%; padding: 12px; background: transparent; border: 1.5px solid var(--border); border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--text-mid); cursor: pointer; font-family: 'Noto Sans JP', sans-serif; transition: .2s; }
+    #advanced-toggle:hover { background: var(--bg); }
+    #advanced-box { display: none; margin-top: 12px; }
+    .adv-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .adv-field input { width: 100%; padding: 9px 42px 9px 12px; border: 1.5px solid var(--border); border-radius: 9px; font-size: 14px; font-family: 'Noto Sans JP', sans-serif; color: var(--text); outline: none; background: var(--bg); transition: border-color .2s; }
+    .adv-field input:focus { border-color: var(--green); background: var(--white); }
+    .adv-field { position: relative; }
+    .adv-unit { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--text-light); font-weight: 600; }
+    select { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); border: 1.5px solid var(--border); border-radius: 9px; color: var(--text); font-size: 13px; padding: 9px 12px; outline: none; cursor: pointer; width: 100%; transition: border-color .2s; }
+    select:focus { border-color: var(--green); }
+
+    /* ── 結果エリア ── */
+    #empty-state { text-align: center; padding: 48px 20px; background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); }
+    .empty-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-text { font-size: 15px; color: var(--text-light); }
+
+    /* タブ */
+    .tab-nav { display: flex; gap: 2px; overflow-x: auto; border-bottom: 2px solid var(--border); margin-bottom: 16px; padding-bottom: 0; scrollbar-width: none; }
+    .tab-nav::-webkit-scrollbar { display: none; }
+    .tab-btn { padding: 10px 14px; border: none; background: transparent; font-size: 13px; font-weight: 600; color: var(--text-light); cursor: pointer; font-family: 'Noto Sans JP', sans-serif; white-space: nowrap; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: .15s; }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* 結果ヒーロー */
+    .result-hero { text-align: center; padding: 24px 16px; background: linear-gradient(135deg, #166534 0%, #16a34a 60%, #22c55e 100%); border-radius: var(--radius); margin-bottom: 16px; color: #fff; }
+    .result-hero-sub { font-size: 12px; letter-spacing: .12em; opacity: .8; margin-bottom: 4px; }
+    .result-hero-num { font-family: 'DM Serif Display', serif; font-size: 52px; line-height: 1; }
+    .result-hero-unit { font-size: 18px; margin-left: 4px; }
+    .result-hero-monthly { font-size: 14px; margin-top: 8px; opacity: .9; }
+    .result-hero-rate { opacity: .7; font-size: 13px; }
+
+    .result-sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .result-sub-card { background: var(--bg); border-radius: 10px; padding: 14px; text-align: center; }
+    .result-sub-label { font-size: 11px; color: var(--text-light); margin-bottom: 6px; font-weight: 600; }
+    .result-sub-val { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--text); }
+    .result-sub-unit { font-size: 13px; }
+    .result-sub-note { font-size: 11px; color: var(--text-light); margin-top: 4px; }
+
+    /* 内訳 */
+    .breakdown-section { margin-bottom: 16px; }
+    .breakdown-title { font-size: 11px; font-weight: 700; color: var(--text-light); letter-spacing: .1em; margin-bottom: 8px; }
+    .breakdown-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--bg); font-size: 14px; }
+    .breakdown-row:last-child { border-bottom: none; }
+    .breakdown-row.total { font-weight: 700; color: var(--text); padding-top: 10px; border-top: 2px solid var(--border); border-bottom: none; }
+    .text-green { color: var(--green); }
+    .text-red   { color: #dc2626; }
+
+    /* 年収比較・シミュ */
+    .compare-chart { display: flex; flex-direction: column; gap: 6px; }
+    .compare-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    .compare-row-cur .compare-bar { background: var(--green) !important; }
+    .compare-row-cur { background: var(--green-bg); border-radius: 8px; padding: 4px 6px; }
+    .compare-label { min-width: 46px; font-weight: 600; color: var(--text-mid); }
+    .compare-bar-wrap { flex: 1; height: 12px; background: var(--bg); border-radius: 6px; overflow: hidden; }
+    .compare-bar { height: 100%; background: #94a3b8; border-radius: 6px; transition: width .4s; }
+    .compare-val  { min-width: 50px; text-align: right; font-weight: 700; color: var(--text); }
+    .compare-rate { min-width: 36px; text-align: right; font-size: 12px; color: var(--text-light); }
+
+    /* シミュコントロール */
+    .sim-controls { background: var(--bg); border-radius: var(--radius); padding: 14px 16px; }
+    .sim-control-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; font-size: 13px; }
+    .sim-control-row:last-child { margin-bottom: 0; }
+    .sim-control-row label { min-width: 160px; color: var(--text-mid); }
+
+    /* 節税 */
+    .furusato-box { background: var(--green-bg); border: 1px solid var(--green-border); border-radius: var(--radius); padding: 20px; text-align: center; }
+    .furusato-val { font-family: 'DM Serif Display', serif; font-size: 36px; color: var(--green); }
+    .furusato-note { font-size: 13px; color: var(--text-mid); margin-top: 6px; }
+    .wall-row { padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; font-size: 13px; }
+    .wall-warn  { border-color: #fde68a; background: #fffbeb; }
+    .wall-over  { border-color: var(--green-border); background: var(--green-bg); }
+    .wall-name  { font-weight: 700; color: var(--text); display: block; margin-bottom: 2px; }
+    .wall-desc  { font-size: 12px; color: var(--text-light); }
+    .wall-status { text-align: right; flex-shrink: 0; }
+    .wall-badge { display: block; font-weight: 700; font-size: 12px; margin-bottom: 2px; }
+    .wall-diff  { font-size: 12px; color: var(--text-light); }
+
+    /* 共有ボタン */
+    .share-btn-wrap { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    #share-btn { background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; padding: 9px 18px; font-size: 13px; font-weight: 600; font-family: 'Noto Sans JP', sans-serif; color: var(--text-mid); cursor: pointer; transition: .15s; }
+    #share-btn:hover { border-color: var(--green); color: var(--green); }
+    #share-btn.copied { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+
+    /* SP */
+    @media (max-width: 767px) {
+      .salary-input-wrap input { font-size: 20px; }
+      .result-hero-num { font-size: 42px; }
+      .adv-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="header-placeholder"></div>
+
+<div id="page-wrap">
+  <div class="layout-3col">
+
+    <!-- 左サイドバー広告 -->
+    <div class="col-sidebar-left">
+      <div class="ad-slot ad-sidebar" aria-hidden="true">
+        <div class="ad-slot-inner"><span>広告</span><small>160×600</small></div>
+        <p class="ad-label">ADVERTISEMENT</p>
+      </div>
+    </div>
+
+    <main class="col-main" id="main-content">
+      <!-- ページタイトル -->
+      <div class="input-card" style="border-color:var(--green-border);background:linear-gradient(135deg,#f0fdf4,#fff);">
+        <h1 style="font-family:'DM Serif Display',serif;font-size:28px;color:var(--text);margin-bottom:4px;">手取り計算ツール</h1>
+        <p style="font-size:13px;color:var(--text-light);">年収・都道府県・家族構成を入力して手取り額を無料で計算</p>
+      </div>
+
+      <!-- ① 年収入力 -->
+      <div class="input-card">
+        <div class="section-label">年収 / 月収入力</div>
+        <div class="toggle-group" style="margin-bottom:16px;">
+          <button class="toggle-btn active" data-mode="annual">年収で入力</button>
+          <button class="toggle-btn" data-mode="monthly">月収＋ボーナスで入力</button>
+        </div>
+
+        <!-- 年収モード -->
+        <div id="annual-inputs">
+          <label class="field-label" for="annual-salary-input">年収（額面）</label>
+          <div class="salary-input-wrap">
+            <input type="number" id="annual-salary-input" placeholder="400" min="65" max="9999" inputmode="numeric">
+            <span class="unit">万円</span>
+          </div>
+          <input type="range" id="salary-slider" min="100" max="2000" step="50" value="0">
+          <div class="slider-labels"><span>100万</span><span>2000万</span></div>
+          <div class="quick-btns" id="quick-btns">
+            <button class="quick-btn" data-val="200">200万</button>
+            <button class="quick-btn" data-val="300">300万</button>
+            <button class="quick-btn" data-val="400">400万</button>
+            <button class="quick-btn" data-val="500">500万</button>
+            <button class="quick-btn" data-val="600">600万</button>
+            <button class="quick-btn" data-val="700">700万</button>
+            <button class="quick-btn" data-val="800">800万</button>
+            <button class="quick-btn" data-val="1000">1000万</button>
+          </div>
+        </div>
+
+        <!-- 月収モード -->
+        <div class="monthly-grid" id="monthly-inputs">
+          <div>
+            <label class="field-label" for="monthly-salary-input">月収（額面）</label>
+            <div class="salary-input-wrap">
+              <input type="number" id="monthly-salary-input" placeholder="30" inputmode="numeric">
+              <span class="unit">万円</span>
+            </div>
+          </div>
+          <div>
+            <label class="field-label" for="bonus-input">年間ボーナス合計</label>
+            <div class="salary-input-wrap">
+              <input type="number" id="bonus-input" placeholder="60" inputmode="numeric">
+              <span class="unit">万円</span>
+            </div>
+          </div>
+          <div class="monthly-note" id="monthly-note" style="display:none;"></div>
+        </div>
+      </div>
+
+      <!-- ② 基本情報 -->
+      <div class="input-card">
+        <div class="section-label">基本情報</div>
+        <div style="display:grid;gap:14px;">
+          <div>
+            <label class="field-label" for="pref-select">都道府県（健康保険料率に影響）</label>
+            <select id="pref-select"></select>
+          </div>
+          <div>
+            <label class="field-label">年齢グループ（介護保険料に影響）</label>
+            <div class="toggle-group">
+              <button class="toggle-btn active" data-age="35">〜39歳</button>
+              <button class="toggle-btn" data-age="50">40〜64歳</button>
+              <button class="toggle-btn" data-age="65">65歳〜</button>
+            </div>
+          </div>
+          <div>
+            <label class="field-label">雇用形態</label>
+            <div class="toggle-group">
+              <button class="toggle-btn active" data-emp="fulltime">会社員・公務員</button>
+              <button class="toggle-btn" data-emp="parttime">パート・アルバイト</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ③ 家族構成 -->
+      <div class="input-card">
+        <div class="section-label">家族構成・人的控除</div>
+
+        <div class="check-row">
+          <input type="checkbox" id="has-spouse">
+          <label for="has-spouse">配偶者がいる（配偶者控除・配偶者特別控除）</label>
+        </div>
+        <div id="spouse-income-row" style="display:none;padding:8px 0 8px 26px;">
+          <label class="field-label" for="spouse-income">配偶者の年収</label>
+          <div class="salary-input-wrap" style="max-width:200px;">
+            <input type="number" id="spouse-income" placeholder="0" inputmode="numeric">
+            <span class="unit">万円</span>
+          </div>
+        </div>
+
+        <div style="margin-top:8px;">
+          <label class="field-label">扶養親族の人数</label>
+          <div style="display:grid;gap:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;">
+              <span style="font-size:13px;color:var(--text-mid);">一般扶養（16歳以上）</span>
+              <div class="counter" id="dep-general">
+                <button class="counter-btn counter-minus">−</button>
+                <span class="counter-val">0</span>
+                <button class="counter-btn counter-plus">+</button>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;">
+              <span style="font-size:13px;color:var(--text-mid);">特定扶養（19〜22歳）</span>
+              <div class="counter" id="dep-specific">
+                <button class="counter-btn counter-minus">−</button>
+                <span class="counter-val">0</span>
+                <button class="counter-btn counter-plus">+</button>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;">
+              <span style="font-size:13px;color:var(--text-mid);">老人扶養（70歳以上）</span>
+              <div class="counter" id="dep-elderly">
+                <button class="counter-btn counter-minus">−</button>
+                <span class="counter-val">0</span>
+                <button class="counter-btn counter-plus">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="check-row" style="border:none;padding:4px 0;">
+            <input type="checkbox" id="single-parent">
+            <label for="single-parent" style="font-size:13px;">ひとり親控除</label>
+          </div>
+          <div class="check-row" style="border:none;padding:4px 0;">
+            <input type="checkbox" id="widow">
+            <label for="widow" style="font-size:13px;">寡婦控除</label>
+          </div>
+        </div>
+
+        <div style="margin-top:10px;">
+          <label class="field-label" for="disability-type">障害者控除</label>
+          <select id="disability-type">
+            <option value="none">なし</option>
+            <option value="general">一般障害者（27万円）</option>
+            <option value="special">特別障害者（40万円）</option>
+            <option value="cohabitSpecial">同居特別障害者（75万円）</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- ④ 詳細控除 -->
+      <div class="input-card">
+        <button id="advanced-toggle">▼ 詳細控除を入力する</button>
+        <div id="advanced-box">
+          <div class="adv-row">
+            <div class="adv-field">
+              <label class="field-label">生命保険料（新契約）</label>
+              <input type="number" id="adv-life-new" placeholder="0" inputmode="numeric">
+              <span class="adv-unit">円/年</span>
+            </div>
+            <div class="adv-field">
+              <label class="field-label">生命保険料（旧契約）</label>
+              <input type="number" id="adv-life-old" placeholder="0" inputmode="numeric">
+              <span class="adv-unit">円/年</span>
+            </div>
+          </div>
+          <div class="adv-row">
+            <div class="adv-field">
+              <label class="field-label">個人年金保険料（新契約）</label>
+              <input type="number" id="adv-pension-new" placeholder="0" inputmode="numeric">
+              <span class="adv-unit">円/年</span>
+            </div>
+            <div class="adv-field">
+              <label class="field-label">地震保険料</label>
+              <input type="number" id="adv-earthquake" placeholder="0" inputmode="numeric">
+              <span class="adv-unit">円/年</span>
+            </div>
+          </div>
+          <div class="adv-row">
+            <div class="adv-field">
+              <label class="field-label">旧長期損害保険料</label>
+              <input type="number" id="adv-longterm" placeholder="0" inputmode="numeric">
+              <span class="adv-unit">円/年</span>
+            </div>
+            <div class="adv-field">
+              <label class="field-label">住宅ローン控除</label>
+              <input type="number" id="adv-housing" placeholder="0" inputmode="numeric">
+              <span class="adv-unit">万円/年</span>
+            </div>
+          </div>
+          <div class="adv-row">
+            <div class="adv-field">
+              <label class="field-label">医療費（年間実支出）</label>
+              <input type="number" id="adv-medical" placeholder="0" inputmode="numeric">
+              <span class="adv-unit">万円/年</span>
+            </div>
+            <div class="adv-field">
+              <label class="field-label">通勤手当（月額）</label>
+              <input type="number" id="adv-commute" placeholder="0" inputmode="numeric">
+              <span class="adv-unit">千円/月</span>
+            </div>
+          </div>
+          <div class="adv-row">
+            <div class="adv-field">
+              <label class="field-label">iDeCo掛金（月額）</label>
+              <input type="number" id="adv-ideco" placeholder="0" inputmode="numeric" max="23000">
+              <span class="adv-unit">円/月</span>
+            </div>
+            <div class="adv-field">
+              <label class="field-label">その他所得控除</label>
+              <input type="number" id="adv-other" placeholder="0" inputmode="numeric">
+              <span class="adv-unit">万円</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 計算結果エリア ── -->
+
+      <!-- 未計算状態 -->
+      <div id="empty-state">
+        <div class="empty-icon">💴</div>
+        <div class="empty-text">年収を入力すると手取りが表示されます</div>
+      </div>
+
+      <!-- 結果パネル -->
+      <div id="result-panel" class="input-card" style="display:none;">
+        <!-- タブナビ -->
+        <div class="tab-nav">
+          <button class="tab-btn active" data-tab="result">計算結果</button>
+          <button class="tab-btn" data-tab="deduct">控除内訳</button>
+          <button class="tab-btn" data-tab="compare">年収比較</button>
+          <button class="tab-btn" data-tab="simulate">昇給シミュ</button>
+          <button class="tab-btn" data-tab="saving">節税</button>
+          <button class="tab-btn" data-tab="job">職種比較</button>
+        </div>
+
+        <!-- 各タブのコンテンツ -->
+        <div class="tab-pane active" data-tab="result" id="tab-result"></div>
+        <div class="tab-pane" data-tab="deduct"   id="tab-deduct"></div>
+        <div class="tab-pane" data-tab="compare"  id="tab-compare"></div>
+        <div class="tab-pane" data-tab="simulate" id="tab-simulate"></div>
+        <div class="tab-pane" data-tab="saving"   id="tab-saving"></div>
+        <div class="tab-pane" data-tab="job"       id="tab-job"></div>
+
+        <!-- 広告（計算結果直下） -->
+        <div class="ad-slot ad-rect" aria-hidden="true" style="margin:20px auto 0;">
+          <div class="ad-slot-inner"><span>広告</span><small>300×250</small></div>
+          <p class="ad-label">ADVERTISEMENT</p>
+        </div>
+
+        <!-- URL共有 -->
+        <div class="share-btn-wrap">
+          <span style="font-size:13px;color:var(--text-light);margin-right:10px;">この条件を共有：</span>
+          <button id="share-btn">🔗 URLをコピー</button>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- 右サイドバー広告 -->
+    <div class="col-sidebar-right">
+      <div class="ad-slot ad-sidebar" aria-hidden="true">
+        <div class="ad-slot-inner"><span>広告</span><small>160×600</small></div>
+        <p class="ad-label">ADVERTISEMENT</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-ad-placeholder"></div>
+<div id="footer-placeholder"></div>
+
+<script src="js/pref-rates.js"></script>
+<script src="js/calc.js"></script>
+<script src="js/common.js"></script>
+<script src="js/index.js"></script>
+
+<!-- 月収モードの年収換算表示 -->
+<script>
+(function () {
+  function updateMonthlyNote() {
+    const m = parseInt(document.getElementById('monthly-salary-input').value) || 0;
+    const b = parseInt(document.getElementById('bonus-input').value) || 0;
+    const total = m * 12 + b;
+    const note = document.getElementById('monthly-note');
+    if (total > 0) {
+      note.style.display = 'block';
+      note.textContent = `年収換算：${total.toLocaleString('ja-JP')}万円`;
+    } else {
+      note.style.display = 'none';
+    }
+  }
+  document.getElementById('monthly-salary-input').addEventListener('input', updateMonthlyNote);
+  document.getElementById('bonus-input').addEventListener('input', updateMonthlyNote);
+})();
+</script>
+</body>
+</html>

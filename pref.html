@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ja" translate="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>都道府県別 手取り比較ランキング｜手取り計算ツール</title>
+  <meta name="description" content="年収を入力して47都道府県の手取り額を比較。健康保険料率が最も低い都道府県・高い都道府県ランキングを表示。">
+  <link rel="canonical" href="https://tedori-keisan.com/pref.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/common.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "都道府県別 手取り比較ランキング",
+    "description": "47都道府県の手取り額・健康保険料率を比較",
+    "url": "https://tedori-keisan.com/pref.html"
+  }
+  </script>
+
+  <style>
+    /* 入力エリア */
+    .input-section {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      margin-bottom: 24px;
+    }
+    .input-group { flex: 1; min-width: 160px; }
+    .input-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-mid);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .salary-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+    .salary-input-wrap input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-right: none;
+      border-radius: 9px 0 0 9px;
+      font-size: 16px;
+      font-family: 'DM Serif Display', serif;
+      color: var(--text);
+      outline: none;
+      background: var(--white);
+      transition: border-color .2s;
+    }
+    .salary-input-wrap input:focus { border-color: var(--green); }
+    .salary-unit {
+      padding: 11px 14px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 0 9px 9px 0;
+      font-size: 14px;
+      color: var(--text-mid);
+      white-space: nowrap;
+    }
+
+    /* クイック選択 */
+    .quick-select {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .quick-btn {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      border: 1.5px solid var(--border);
+      background: var(--white);
+      color: var(--text-mid);
+      cursor: pointer;
+      font-family: 'Noto Sans JP', sans-serif;
+      transition: .15s;
+    }
+    .quick-btn:hover, .quick-btn.active {
+      background: var(--green-bg);
+      border-color: var(--green);
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    /* サマリーカード */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .summary-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      text-align: center;
+    }
+    .summary-card.best  { border-color: var(--green); background: var(--green-bg); }
+    .summary-card.worst { border-color: #fca5a5; background: #fff5f5; }
+    .summary-card.diff  { border-color: #93c5fd; background: #eff6ff; }
+    .summary-card-label { font-size: 11px; color: var(--text-light); margin-bottom: 6px; font-weight: 700; letter-spacing: .06em; }
+    .summary-card-pref  { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .summary-card-val   { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--green); }
+    .summary-card.worst .summary-card-val  { color: #dc2626; }
+    .summary-card.diff  .summary-card-val  { color: #2563eb; }
+
+    /* ソートボタン */
+    .sort-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .sort-label { font-size: 13px; color: var(--text-mid); font-weight: 600; }
+    .sort-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      border: 1.5px solid var(--border);
+      background: var(--white);
+      color: var(--text-mid);
+      cursor: pointer;
+      font-family: 'Noto Sans JP', sans-serif;
+      transition: .15s;
+    }
+    .sort-btn.active {
+      background: var(--green);
+      border-color: var(--green);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    /* ランキングテーブル */
+    .rank-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .rank-table th {
+      background: var(--green-bg);
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 700;
+      border-bottom: 2px solid var(--green-border);
+      white-space: nowrap;
+    }
+    .rank-table th:not(:first-child):not(:nth-child(2)) { text-align: right; }
+    .rank-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .rank-table td:not(:first-child):not(:nth-child(2)) { text-align: right; }
+    .rank-table tr:hover td { background: #fafafa; }
+    .rank-table tr.rank-best td { background: #f0fdf4; }
+
+    .rank-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .rank-num.gold   { background: #fef9c3; color: #ca8a04; }
+    .rank-num.silver { background: #f1f5f9; color: #64748b; }
+    .rank-num.bronze { background: #fff7ed; color: #c2410c; }
+    .rank-num.normal { background: var(--bg); color: var(--text-mid); font-size: 12px; }
+
+    .bar-cell { min-width: 120px; }
+    .bar-wrap { display: flex; align-items: center; gap: 8px; }
+    .bar-fill { height: 8px; background: var(--green); border-radius: 4px; }
+    .bar-val  { font-size: 12px; color: var(--text-mid); white-space: nowrap; }
+
+    /* 空状態 */
+    .empty-state {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--text-light);
+    }
+    .empty-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-text { font-size: 14px; }
+
+    @media (max-width: 767px) {
+      .summary-grid { grid-template-columns: 1fr; gap: 8px; }
+      .rank-table { font-size: 12px; }
+      .rank-table th, .rank-table td { padding: 8px 10px; }
+      .bar-cell { min-width: 80px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="header-placeholder"></div>
+
+<div id="page-wrap">
+  <div class="layout-3col">
+    <div class="col-sidebar-left">
+      <div class="ad-slot ad-sidebar" aria-hidden="true">
+        <div class="ad-slot-inner"><span>広告</span><small>160×600</small></div>
+        <p class="ad-label">ADVERTISEMENT</p>
+      </div>
+    </div>
+
+    <main class="col-main" id="main-content">
+      <div class="card">
+        <h1 class="page-title">都道府県別 手取り比較</h1>
+        <p class="page-subtitle">年収を入力して47都道府県の手取りランキングを確認</p>
+
+        <!-- 入力 -->
+        <div class="input-section">
+          <div class="input-group">
+            <label for="salary-input">年収（額面）</label>
+            <div class="salary-input-wrap">
+              <input type="number" id="salary-input" placeholder="500" min="100" max="9999" step="10">
+              <span class="salary-unit">万円</span>
+            </div>
+            <div class="quick-select" id="quick-select">
+              <button class="quick-btn" data-val="300">300万</button>
+              <button class="quick-btn" data-val="400">400万</button>
+              <button class="quick-btn active" data-val="500">500万</button>
+              <button class="quick-btn" data-val="600">600万</button>
+              <button class="quick-btn" data-val="700">700万</button>
+              <button class="quick-btn" data-val="800">800万</button>
+              <button class="quick-btn" data-val="1000">1000万</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- サマリー -->
+        <div class="summary-grid" id="summary-grid">
+          <div class="summary-card">
+            <div class="summary-card-label">年収を入力してください</div>
+            <div class="summary-card-pref">——</div>
+            <div class="summary-card-val">——</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-card-label">——</div>
+            <div class="summary-card-pref">——</div>
+            <div class="summary-card-val">——</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-card-label">——</div>
+            <div class="summary-card-pref">——</div>
+            <div class="summary-card-val">——</div>
+          </div>
+        </div>
+
+        <!-- ソート -->
+        <div class="sort-bar">
+          <span class="sort-label">並び替え：</span>
+          <button class="sort-btn active" id="sort-takehome" onclick="setSort('takehome', this)">手取り額が多い順</button>
+          <button class="sort-btn" id="sort-rate" onclick="setSort('rate', this)">健康保険料率が低い順</button>
+        </div>
+
+        <!-- ランキング -->
+        <div id="rank-wrap">
+          <div class="empty-state">
+            <div class="empty-icon">🗾</div>
+            <div class="empty-text">年収を入力するとランキングが表示されます</div>
+          </div>
+        </div>
+
+        <!-- 広告 -->
+        <div class="ad-slot ad-rect" aria-hidden="true" style="margin:24px auto 0;">
+          <div class="ad-slot-inner"><span>広告</span><small>300×250</small></div>
+          <p class="ad-label">ADVERTISEMENT</p>
+        </div>
+
+        <p style="font-size:12px;color:var(--text-light);margin-top:16px;line-height:1.8;">
+          ※ 会社員・39歳以下・独身・基本控除のみでの概算です。健康保険料の差額のみが都道府県間の手取り差に反映されます。
+        </p>
+      </div>
+    </main>
+
+    <div class="col-sidebar-right">
+      <div class="ad-slot ad-sidebar" aria-hidden="true">
+        <div class="ad-slot-inner"><span>広告</span><small>160×600</small></div>
+        <p class="ad-label">ADVERTISEMENT</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-ad-placeholder"></div>
+<div id="footer-placeholder"></div>
+
+<script src="js/pref-rates.js"></script>
+<script src="js/calc.js"></script>
+<script src="js/common.js"></script>
+<script>
+(function () {
+  const input     = document.getElementById('salary-input');
+  const quickSel  = document.getElementById('quick-select');
+  const rankWrap  = document.getElementById('rank-wrap');
+  const summaryEl = document.getElementById('summary-grid');
+
+  let currentSort = 'takehome';
+  let currentSalary = 500; // 万円
+
+  const fmtM = n => (Math.round(n / 10000)).toLocaleString('ja-JP') + '万円';
+  const fmtPct = r => (r * 100).toFixed(2) + '%';
+
+  /* ── クイック選択 ── */
+  quickSel.addEventListener('click', e => {
+    const btn = e.target.closest('.quick-btn');
+    if (!btn) return;
+    quickSel.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    input.value = btn.dataset.val;
+    currentSalary = parseInt(btn.dataset.val, 10);
+    render();
+  });
+
+  input.addEventListener('input', () => {
+    const v = parseInt(input.value, 10);
+    if (!v || v < 100 || v > 9999) return;
+    currentSalary = v;
+    quickSel.querySelectorAll('.quick-btn').forEach(b => {
+      b.classList.toggle('active', parseInt(b.dataset.val, 10) === v);
+    });
+    render();
+  });
+
+  window.setSort = function (mode, btn) {
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentSort = mode;
+    render();
+  };
+
+  /* ── レンダリング ── */
+  function render() {
+    const annualSalary = currentSalary * 10000;
+
+    // 全都道府県を計算
+    const rows = PREFS.map(pref => {
+      const r = calcTakeHome({ annualSalary, age: 35, prefecture: pref, employmentType: 'fulltime' });
+      return {
+        pref,
+        takeHome: r ? r.takeHome : 0,
+        healthRate: PREF_HEALTH_RATES[pref],
+        healthInsurance: r ? r.healthInsurance : 0,
+      };
+    });
+
+    // ソート
+    if (currentSort === 'takehome') {
+      rows.sort((a, b) => b.takeHome - a.takeHome);
+    } else {
+      rows.sort((a, b) => a.healthRate - b.healthRate);
+    }
+
+    const best  = rows[0];
+    const worst = rows[rows.length - 1];
+    const diff  = best.takeHome - worst.takeHome;
+    const maxTH = best.takeHome;
+
+    // サマリー更新
+    summaryEl.innerHTML = `
+      <div class="summary-card best">
+        <div class="summary-card-label">手取りが最も多い</div>
+        <div class="summary-card-pref">${best.pref}</div>
+        <div class="summary-card-val">${fmtM(best.takeHome)}</div>
+      </div>
+      <div class="summary-card worst">
+        <div class="summary-card-label">手取りが最も少ない</div>
+        <div class="summary-card-pref">${worst.pref}</div>
+        <div class="summary-card-val">${fmtM(worst.takeHome)}</div>
+      </div>
+      <div class="summary-card diff">
+        <div class="summary-card-label">最大差額（年間）</div>
+        <div class="summary-card-pref">1位と47位の差</div>
+        <div class="summary-card-val">${fmtM(diff)}</div>
+      </div>
+    `;
+
+    // テーブル生成
+    const tbody = rows.map((row, i) => {
+      const rank = i + 1;
+      const rankCls = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : 'normal';
+      const barW = Math.round((row.takeHome / maxTH) * 100);
+      const isBest = rank === 1;
+      return `
+        <tr class="${isBest ? 'rank-best' : ''}">
+          <td><span class="rank-num ${rankCls}">${rank}</span></td>
+          <td><strong>${row.pref}</strong></td>
+          <td class="bar-cell">
+            <div class="bar-wrap">
+              <div class="bar-fill" style="width:${barW}px;"></div>
+              <span class="bar-val">${fmtM(row.takeHome)}</span>
+            </div>
+          </td>
+          <td>${fmtM(row.takeHome / 12)}</td>
+          <td>${fmtPct(row.healthRate)}</td>
+          <td>${fmtM(row.healthInsurance)}</td>
+        </tr>`;
+    }).join('');
+
+    rankWrap.innerHTML = `
+      <div style="overflow-x:auto;">
+        <table class="rank-table">
+          <thead>
+            <tr>
+              <th>順位</th>
+              <th>都道府県</th>
+              <th>年間手取り</th>
+              <th>月手取り</th>
+              <th>健康保険料率</th>
+              <th>年間健康保険料</th>
+            </tr>
+          </thead>
+          <tbody>${tbody}</tbody>
+        </table>
+      </div>`;
+  }
+
+  /* 初期表示（500万円） */
+  input.value = '500';
+  render();
+})();
+</script>
+</body>
+</html>

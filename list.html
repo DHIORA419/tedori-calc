@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ja" translate="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>年収別 手取り早見表｜手取り計算ツール</title>
+  <meta name="description" content="年収100万〜2000万円の手取り額・月手取り・手取り率・税金・社会保険料を一覧で確認。東京都・会社員・独身での計算結果早見表。">
+  <link rel="canonical" href="https://tedori-keisan.com/list.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/common.css">
+
+  <!-- 構造化データ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "年収別 手取り早見表",
+    "description": "年収100万〜2000万円の手取り額・月手取り・手取り率を一覧表示",
+    "url": "https://tedori-keisan.com/list.html"
+  }
+  </script>
+
+  <style>
+    /* 注目年収カード */
+    .spotlight-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .spotlight-card {
+      background: var(--white);
+      border: 1.5px solid var(--green-border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .15s, box-shadow .15s;
+      text-decoration: none;
+    }
+    .spotlight-card:hover {
+      border-color: var(--green);
+      box-shadow: 0 2px 12px rgba(22,163,74,.12);
+    }
+    .spotlight-label { font-size: 12px; color: var(--text-light); margin-bottom: 4px; }
+    .spotlight-income { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); }
+    .spotlight-takehome { font-size: 13px; color: var(--green); font-weight: 700; margin-top: 4px; }
+
+    /* フィルターボタン */
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .filter-label { font-size: 13px; color: var(--text-mid); font-weight: 600; }
+    .filter-btn {
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      border: 1.5px solid var(--border);
+      background: var(--white);
+      color: var(--text-mid);
+      cursor: pointer;
+      font-family: 'Noto Sans JP', sans-serif;
+      transition: .15s;
+    }
+    .filter-btn.active {
+      background: var(--green);
+      border-color: var(--green);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    /* 条件バッジ */
+    .condition-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .condition-badge {
+      background: var(--green-bg);
+      border: 1px solid var(--green-border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      color: var(--green-dark);
+      font-weight: 600;
+    }
+
+    /* テーブル */
+    .table-wrap { overflow-x: auto; }
+    table.list-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 600px;
+    }
+    table.list-table thead tr {
+      background: var(--green-bg);
+    }
+    table.list-table th {
+      padding: 10px 14px;
+      text-align: right;
+      font-weight: 700;
+      color: var(--text);
+      border-bottom: 2px solid var(--green-border);
+      white-space: nowrap;
+    }
+    table.list-table th:first-child { text-align: left; }
+    table.list-table td {
+      padding: 10px 14px;
+      text-align: right;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-mid);
+    }
+    table.list-table td:first-child { text-align: left; font-weight: 600; color: var(--text); }
+    table.list-table tr.highlight td { background: #f0fdf4; }
+    table.list-table tr.hidden { display: none; }
+    table.list-table tr:hover td { background: #fafafa; }
+
+    .rate-bar {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .rate-bar-fill {
+      height: 6px;
+      background: var(--green);
+      border-radius: 3px;
+      min-width: 2px;
+    }
+    .rate-text { font-size: 12px; color: var(--text-mid); }
+
+    /* SP用スタイル */
+    @media (max-width: 767px) {
+      .spotlight-grid { grid-template-columns: repeat(2, 1fr); }
+      table.list-table { font-size: 12px; }
+      table.list-table th, table.list-table td { padding: 8px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="header-placeholder"></div>
+
+<div id="page-wrap">
+  <div class="layout-3col">
+    <div class="col-sidebar-left">
+      <div class="ad-slot ad-sidebar" aria-hidden="true">
+        <div class="ad-slot-inner"><span>広告</span><small>160×600</small></div>
+        <p class="ad-label">ADVERTISEMENT</p>
+      </div>
+    </div>
+
+    <main class="col-main" id="main-content">
+      <div class="card">
+        <h1 class="page-title">年収別 手取り早見表</h1>
+        <p class="page-subtitle">年収100万〜2000万円の手取り・税金・社会保険料を一覧で確認</p>
+
+        <!-- 計算条件 -->
+        <div class="condition-bar">
+          <span class="condition-badge">東京都</span>
+          <span class="condition-badge">会社員・正社員</span>
+          <span class="condition-badge">39歳以下（介護保険なし）</span>
+          <span class="condition-badge">独身・扶養なし</span>
+          <span class="condition-badge">控除なし（基本設定）</span>
+        </div>
+
+        <!-- よく検索される年収 -->
+        <h2 class="section-title" style="font-size:15px;margin-bottom:12px;">よく検索される年収</h2>
+        <div class="spotlight-grid" id="spotlight-grid"></div>
+
+        <!-- フィルター -->
+        <div class="filter-bar">
+          <span class="filter-label">表示：</span>
+          <button class="filter-btn active" data-filter="major" onclick="setFilter('major', this)">主要年収のみ</button>
+          <button class="filter-btn" data-filter="all"   onclick="setFilter('all', this)">全表示（100万円刻み）</button>
+        </div>
+
+        <!-- テーブル -->
+        <div class="table-wrap">
+          <table class="list-table" id="list-table">
+            <thead>
+              <tr>
+                <th>年収（額面）</th>
+                <th>年間手取り</th>
+                <th>月手取り</th>
+                <th>手取り率</th>
+                <th>社会保険料</th>
+                <th>税金合計</th>
+              </tr>
+            </thead>
+            <tbody id="list-body"></tbody>
+          </table>
+        </div>
+
+        <!-- 広告 -->
+        <div class="ad-slot ad-rect" aria-hidden="true" style="margin:24px auto 0;">
+          <div class="ad-slot-inner"><span>広告</span><small>300×250</small></div>
+          <p class="ad-label">ADVERTISEMENT</p>
+        </div>
+
+        <!-- 注意 -->
+        <p style="font-size:12px;color:var(--text-light);margin-top:16px;line-height:1.8;">
+          ※ 東京都・会社員・39歳以下・独身・基本控除のみでの概算です。実際の金額は雇用形態・都道府県・家族構成によって異なります。
+          詳細な計算は<a href="index.html" style="color:var(--green);">計算ツール</a>をご利用ください。
+        </p>
+      </div>
+    </main>
+
+    <div class="col-sidebar-right">
+      <div class="ad-slot ad-sidebar" aria-hidden="true">
+        <div class="ad-slot-inner"><span>広告</span><small>160×600</small></div>
+        <p class="ad-label">ADVERTISEMENT</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-ad-placeholder"></div>
+<div id="footer-placeholder"></div>
+
+<script src="js/pref-rates.js"></script>
+<script src="js/calc.js"></script>
+<script src="js/common.js"></script>
+<script>
+(function () {
+  /* ── よく検索される年収 ── */
+  const SPOTLIGHT = [300, 400, 500, 600, 700, 800, 1000, 1200];
+
+  /* ── 一覧テーブルに表示する年収（万円） ── */
+  const ALL_INCOMES = [];
+  for (let i = 100; i <= 2000; i += 100) ALL_INCOMES.push(i);
+
+  /* 主要年収（フィルター） */
+  const MAJOR = [
+    100, 150, 200, 250, 300, 350, 400, 450,
+    500, 550, 600, 650, 700, 750, 800, 900,
+    1000, 1100, 1200, 1300, 1500, 1800, 2000
+  ];
+
+  const fmt = n => Math.round(n).toLocaleString('ja-JP');
+
+  function calcRow(man) {
+    return calcTakeHome({
+      annualSalary: man * 10000,
+      age: 35,
+      prefecture: '東京',
+      employmentType: 'fulltime',
+    });
+  }
+
+  /* ── スポットライトカード生成 ── */
+  const grid = document.getElementById('spotlight-grid');
+  SPOTLIGHT.forEach(man => {
+    const r = calcRow(man);
+    if (!r) return;
+    const card = document.createElement('a');
+    card.className = 'spotlight-card';
+    card.href = `index.html?s=${man * 10000}`;
+    card.innerHTML = `
+      <div class="spotlight-label">年収</div>
+      <div class="spotlight-income">${man}万円</div>
+      <div class="spotlight-takehome">手取り ${fmt(r.takeHome / 10000)}万円</div>
+    `;
+    grid.appendChild(card);
+  });
+
+  /* ── テーブル生成 ── */
+  const tbody = document.getElementById('list-body');
+
+  ALL_INCOMES.forEach(man => {
+    const r = calcRow(man);
+    if (!r) return;
+
+    const isMajor  = MAJOR.includes(man);
+    const isSpot   = SPOTLIGHT.includes(man);
+    const rateW    = Math.max(4, Math.min(r.takeHomeRate, 80));
+
+    const tr = document.createElement('tr');
+    if (isSpot) tr.classList.add('highlight');
+    if (!isMajor) tr.classList.add('hidden');
+    tr.dataset.major = isMajor ? '1' : '0';
+
+    tr.innerHTML = `
+      <td>${fmt(man)}万円</td>
+      <td>${fmt(r.takeHome / 10000)}万円</td>
+      <td>${fmt(r.monthlyTakeHome / 10000)}万円</td>
+      <td>
+        <div class="rate-bar">
+          <div class="rate-bar-fill" style="width:${rateW}px;"></div>
+          <span class="rate-text">${r.takeHomeRate}%</span>
+        </div>
+      </td>
+      <td>${fmt(r.totalSocialInsurance / 10000)}万円</td>
+      <td>${fmt(r.totalTax / 10000)}万円</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  /* ── フィルター切替 ── */
+  window.setFilter = function (mode, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    document.querySelectorAll('#list-body tr').forEach(tr => {
+      if (mode === 'all') {
+        tr.classList.remove('hidden');
+      } else {
+        tr.classList.toggle('hidden', tr.dataset.major !== '1');
+      }
+    });
+  };
+})();
+</script>
+</body>
+</html>

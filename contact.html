@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ja" translate="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>お問い合わせ｜手取り計算ツール</title>
+  <meta name="description" content="手取り計算ツールへのご質問・ご要望はこちらのフォームからお送りください。">
+  <meta name="robots" content="noindex,follow">
+  <link rel="canonical" href="https://tedori-keisan.com/contact.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/common.css">
+  <style>
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .form-group label .required {
+      font-size: 11px;
+      color: #dc2626;
+      margin-left: 4px;
+      font-weight: 700;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      padding: 11px 14px;
+      font-size: 14px;
+      font-family: 'Noto Sans JP', sans-serif;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(22,163,74,.1);
+    }
+    .form-group textarea { resize: vertical; min-height: 140px; line-height: 1.8; }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    .submit-btn {
+      background: var(--green);
+      color: #fff;
+      border: none;
+      padding: 14px 40px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: 'Noto Sans JP', sans-serif;
+      cursor: pointer;
+      transition: background .2s, opacity .2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .submit-btn:hover:not(:disabled) { background: var(--green-dark); }
+    .submit-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .success-box {
+      background: var(--green-bg);
+      border: 1.5px solid var(--green-border);
+      border-radius: var(--radius);
+      padding: 48px 24px;
+      text-align: center;
+      display: none;
+    }
+    .success-box.show { display: block; }
+    .success-icon { font-size: 48px; margin-bottom: 12px; }
+    .success-title { font-size: 18px; font-weight: 700; color: var(--green); margin-bottom: 8px; }
+    .success-body { font-size: 14px; color: var(--text-mid); line-height: 1.8; }
+
+    .contact-form { display: block; }
+    .contact-form.hide { display: none; }
+
+    .contact-info {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      font-size: 13px;
+      color: var(--text-mid);
+      margin-bottom: 24px;
+      line-height: 1.8;
+    }
+    .contact-info ul { padding-left: 18px; margin-top: 6px; }
+
+    .error-msg {
+      font-size: 12px;
+      color: #dc2626;
+      margin-top: 4px;
+      display: none;
+    }
+    .error-msg.show { display: block; }
+  </style>
+</head>
+<body>
+
+<div id="header-placeholder"></div>
+
+<div id="page-wrap">
+  <div class="layout-3col">
+    <div class="col-sidebar-left">
+      <div class="ad-slot ad-sidebar" aria-hidden="true">
+        <div class="ad-slot-inner"><span>広告</span><small>160×600</small></div>
+        <p class="ad-label">ADVERTISEMENT</p>
+      </div>
+    </div>
+
+    <main class="col-main" id="main-content">
+      <div class="card">
+        <h1 class="page-title">お問い合わせ</h1>
+        <p class="page-subtitle">ご質問・ご要望・誤りのご指摘などはこちらからどうぞ</p>
+
+        <div class="contact-info">
+          <strong>お問い合わせ前にご確認ください</strong>
+          <ul>
+            <li>計算の前提条件については<a href="howto.html" style="color:var(--green)">使い方ページ</a>をご覧ください</li>
+            <li>返答まで数日かかる場合があります</li>
+            <li>個別の税務相談にはお答えできません</li>
+          </ul>
+        </div>
+
+        <!-- 送信成功メッセージ -->
+        <div class="success-box" id="success-box">
+          <div class="success-icon">✅</div>
+          <div class="success-title">送信しました</div>
+          <div class="success-body">
+            お問い合わせいただきありがとうございます。<br>
+            内容を確認の上、数日以内にご返答いたします。
+          </div>
+        </div>
+
+        <!-- フォーム -->
+        <form class="contact-form" id="contact-form"
+              action="https://formspree.io/f/YOUR_FORM_ID"
+              method="POST">
+
+          <div class="form-group">
+            <label for="name">お名前<span class="required">必須</span></label>
+            <input type="text" id="name" name="name"
+                   placeholder="山田 太郎" autocomplete="name" required>
+            <div class="error-msg" id="name-error">お名前を入力してください</div>
+          </div>
+
+          <div class="form-group">
+            <label for="email">メールアドレス<span class="required">必須</span></label>
+            <input type="email" id="email" name="email"
+                   placeholder="example@email.com" autocomplete="email" required>
+            <div class="error-msg" id="email-error">正しいメールアドレスを入力してください</div>
+          </div>
+
+          <div class="form-group">
+            <label for="category">お問い合わせ種別</label>
+            <select id="category" name="category">
+              <option value="計算について">計算について</option>
+              <option value="誤りの指摘">誤りの指摘</option>
+              <option value="機能のご要望">機能のご要望</option>
+              <option value="その他">その他</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="message">お問い合わせ内容<span class="required">必須</span></label>
+            <textarea id="message" name="message"
+                      placeholder="ご質問・ご要望をできるだけ詳しくご記入ください" required></textarea>
+            <div class="form-hint">※ 個別の税務・法律相談にはお答えできません</div>
+            <div class="error-msg" id="message-error">お問い合わせ内容を入力してください</div>
+          </div>
+
+          <!-- スパム対策ハニーポット -->
+          <div style="display:none;">
+            <input type="text" name="_gotcha">
+          </div>
+          <input type="hidden" name="_subject" value="【手取り計算ツール】お問い合わせ">
+
+          <button type="submit" class="submit-btn" id="submit-btn">
+            <span>送信する</span>
+          </button>
+        </form>
+      </div>
+    </main>
+
+    <div class="col-sidebar-right">
+      <div class="ad-slot ad-sidebar" aria-hidden="true">
+        <div class="ad-slot-inner"><span>広告</span><small>160×600</small></div>
+        <p class="ad-label">ADVERTISEMENT</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-ad-placeholder"></div>
+<div id="footer-placeholder"></div>
+
+<script src="js/common.js"></script>
+<script>
+(function () {
+  const form = document.getElementById('contact-form');
+  const successBox = document.getElementById('success-box');
+
+  if (!form) return;
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    /* バリデーション */
+    let valid = true;
+    const name = document.getElementById('name');
+    const email = document.getElementById('email');
+    const message = document.getElementById('message');
+
+    const showErr = (id, show) => {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('show', show);
+    };
+
+    showErr('name-error',    !name.value.trim());
+    showErr('email-error',   !email.value.trim() || !email.validity.valid);
+    showErr('message-error', !message.value.trim());
+
+    if (!name.value.trim() || !email.validity.valid || !message.value.trim()) return;
+
+    /* Formspree送信 */
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.querySelector('span').textContent = '送信中…';
+
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'Accept': 'application/json' },
+      });
+
+      if (res.ok) {
+        form.classList.add('hide');
+        successBox.classList.add('show');
+        successBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        btn.disabled = false;
+        btn.querySelector('span').textContent = '送信する';
+        alert('送信に失敗しました。しばらく経ってからお試しください。');
+      }
+    } catch (err) {
+      btn.disabled = false;
+      btn.querySelector('span').textContent = '送信する';
+      alert('通信エラーが発生しました。インターネット接続をご確認ください。');
+    }
+  });
+})();
+</script>
+</body>
+</html>

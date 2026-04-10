@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ja" translate="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>使い方・よくある質問｜手取り計算ツール</title>
+  <meta name="description" content="手取り計算ツールの使い方・計算の前提条件・よくある質問（FAQ）を解説します。健康保険・所得税・住民税の計算方法も説明。">
+  <link rel="canonical" href="https://tedori-keisan.com/howto.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/common.css">
+  <style>
+    /* ステップカード */
+    .step-list { display: flex; flex-direction: column; gap: 12px; }
+    .step-item {
+      display: flex;
+      gap: 16px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      align-items: flex-start;
+    }
+    .step-num {
+      min-width: 32px; height: 32px;
+      background: var(--green);
+      color: #fff;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .step-body { flex: 1; }
+    .step-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .step-desc  { font-size: 13px; color: var(--text-mid); line-height: 1.8; }
+
+    /* 前提条件テーブル */
+    .table-wrap { overflow-x: auto; margin: 0 -4px; }
+    table.data-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 13px;
+    }
+    table.data-table th {
+      background: var(--green-bg);
+      color: var(--text);
+      font-weight: 700;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 2px solid var(--green-border);
+      white-space: nowrap;
+    }
+    table.data-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-mid);
+      line-height: 1.7;
+    }
+    table.data-table tr:last-child td { border-bottom: none; }
+    table.data-table tr:hover td { background: #fafafa; }
+
+    /* FAQ アコーディオン */
+    .faq-list { display: flex; flex-direction: column; gap: 8px; }
+    .faq-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .faq-q {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+      cursor: pointer;
+      background: var(--white);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      gap: 12px;
+      user-select: none;
+      transition: background .15s;
+    }
+    .faq-q:hover { background: var(--green-bg); }
+    .faq-q .faq-icon {
+      font-size: 18px;
+      color: var(--green);
+      flex-shrink: 0;
+      transition: transform .2s;
+    }
+    .faq-item.open .faq-icon { transform: rotate(45deg); }
+    .faq-a {
+      display: none;
+      padding: 0 18px 14px;
+      font-size: 13px;
+      color: var(--text-mid);
+      line-height: 1.85;
+      border-top: 1px solid var(--border);
+      background: var(--white);
+    }
+    .faq-item.open .faq-a { display: block; }
+
+    /* 注意事項ボックス */
+    .caution-box {
+      background: #fffbeb;
+      border: 1.5px solid #fde68a;
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      font-size: 13px;
+      color: #92400e;
+      line-height: 1.85;
+    }
+    .caution-box strong { display: block; margin-bottom: 6px; }
+    .caution-box ul { padding-left: 18px; }
+    .caution-box li { margin-bottom: 4px; }
+
+    /* カードセクション間のマージン */
+    .card + .card { margin-top: 0; }
+
+    /* TOCリンク */
+    .toc {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+    }
+    .toc-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+    .toc ol { padding-left: 20px; }
+    .toc li { font-size: 13px; line-height: 2; }
+    .toc a { color: var(--green); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<div id="header-placeholder"></div>
+
+<div id="page-wrap">
+  <div class="layout-3col">
+    <div class="col-sidebar-left">
+      <div class="ad-slot ad-sidebar" aria-hidden="true">
+        <div class="ad-slot-inner"><span>広告</span><small>160×600</small></div>
+        <p class="ad-label">ADVERTISEMENT</p>
+      </div>
+    </div>
+
+    <main class="col-main" id="main-content">
+      <div class="card">
+        <h1 class="page-title">使い方・よくある質問</h1>
+        <p class="page-subtitle">計算ツールの使い方と、よくある疑問にお答えします</p>
+
+        <div class="toc">
+          <div class="toc-title">目次</div>
+          <ol>
+            <li><a href="#how-to-use">ツールの使い方（4ステップ）</a></li>
+            <li><a href="#conditions">計算の前提条件</a></li>
+            <li><a href="#deductions">控除の種類と計算方法</a></li>
+            <li><a href="#faq">よくある質問</a></li>
+            <li><a href="#caution">ご利用上の注意</a></li>
+          </ol>
+        </div>
+
+        <!-- 使い方 -->
+        <h2 class="section-title" id="how-to-use">ツールの使い方</h2>
+        <div class="step-list">
+          <div class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">年収または月収を入力する</div>
+              <div class="step-desc">年収入力・月収＋ボーナス入力の2モードに対応しています。スライダーで大まかに入力したり、クイック選択ボタンでよく使われる金額を選ぶこともできます。</div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">都道府県・年齢・雇用形態を選ぶ</div>
+              <div class="step-desc">健康保険料は都道府県によって異なります。また介護保険料は40歳以上から加算されます。パート・アルバイトは社会保険の加入条件によって計算が変わります。</div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">家族構成・各種控除を入力する（任意）</div>
+              <div class="step-desc">配偶者・扶養親族・各種控除（生命保険・住宅ローン・iDeCoなど）を入力すると、より正確な税額・手取りが計算できます。入力しなくても計算できます。</div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-title">計算結果を確認する</div>
+              <div class="step-desc">年間手取り・月手取り・社会保険料内訳・税金内訳・ふるさと納税上限などを確認できます。「年収比較」タブでは同じ条件での年収帯別グラフも表示されます。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 計算の前提条件 -->
+      <div class="card" style="margin-top:16px;">
+        <h2 class="section-title" id="conditions">計算の前提条件</h2>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>項目</th><th>計算基準</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>健康保険料</strong></td>
+                <td>全国健康保険協会（協会けんぽ）2024年度 都道府県別料率・労使折半</td>
+              </tr>
+              <tr>
+                <td><strong>厚生年金保険料</strong></td>
+                <td>保険料率18.3%・労使折半（本人負担9.15%）・標準報酬月額上限65万円</td>
+              </tr>
+              <tr>
+                <td><strong>雇用保険料</strong></td>
+                <td>一般事業の労働者負担分 0.6%</td>
+              </tr>
+              <tr>
+                <td><strong>介護保険料</strong></td>
+                <td>40歳以上64歳以下に加算。保険料率1.8%・労使折半</td>
+              </tr>
+              <tr>
+                <td><strong>所得税</strong></td>
+                <td>7段階累進課税（5〜45%）＋復興特別所得税2.1%</td>
+              </tr>
+              <tr>
+                <td><strong>住民税</strong></td>
+                <td>所得割10%（市区町村6%＋都道府県4%）＋均等割5,000円（概算）</td>
+              </tr>
+              <tr>
+                <td><strong>給与所得控除</strong></td>
+                <td>令和2年以降の最新税制・上限195万円</td>
+              </tr>
+              <tr>
+                <td><strong>基礎控除</strong></td>
+                <td>48万円（年収2,400万円以下の場合）</td>
+              </tr>
+              <tr>
+                <td><strong>通勤手当</strong></td>
+                <td>非課税限度額（月15万円まで）を課税対象外として計算</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 控除の種類 -->
+      <div class="card" style="margin-top:16px;">
+        <h2 class="section-title" id="deductions">控除の種類と計算方法</h2>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>控除の種類</th><th>控除額・上限</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>配偶者控除</strong></td><td>配偶者の年収103万円以下：最大38万円</td></tr>
+              <tr><td><strong>配偶者特別控除</strong></td><td>配偶者の年収103〜201万円：最大38万円（逓減）</td></tr>
+              <tr><td><strong>扶養控除（一般）</strong></td><td>16歳以上の扶養親族：38万円/人</td></tr>
+              <tr><td><strong>扶養控除（特定）</strong></td><td>19〜22歳の扶養親族：63万円/人</td></tr>
+              <tr><td><strong>扶養控除（老人）</strong></td><td>70歳以上の扶養親族：58万円/人</td></tr>
+              <tr><td><strong>ひとり親控除</strong></td><td>35万円</td></tr>
+              <tr><td><strong>寡婦控除</strong></td><td>27万円</td></tr>
+              <tr><td><strong>障害者控除（一般）</strong></td><td>27万円</td></tr>
+              <tr><td><strong>障害者控除（特別）</strong></td><td>40万円</td></tr>
+              <tr><td><strong>障害者控除（同居特別）</strong></td><td>75万円</td></tr>
+              <tr><td><strong>生命保険料控除（新契約）</strong></td><td>上限4万円</td></tr>
+              <tr><td><strong>生命保険料控除（旧契約）</strong></td><td>上限5万円</td></tr>
+              <tr><td><strong>個人年金保険料控除</strong></td><td>上限4万円</td></tr>
+              <tr><td><strong>地震保険料控除</strong></td><td>上限5万円</td></tr>
+              <tr><td><strong>住宅ローン控除</strong></td><td>年末残高×0.7%目安（税額控除）</td></tr>
+              <tr><td><strong>医療費控除</strong></td><td>年収5%超過分（上限200万円）</td></tr>
+              <tr><td><strong>iDeCo（個人型確定拠出年金）</strong></td><td>掛金全額が所得控除。会社員は月2.3万円まで</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 広告：コンテンツ中 -->
+        <div class="ad-slot ad-rect" aria-hidden="true" style="margin:24px auto 0;">
+          <div class="ad-slot-inner"><span>広告</span><small>300×250</small></div>
+          <p class="ad-label">ADVERTISEMENT</p>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="card" style="margin-top:16px;">
+        <h2 class="section-title" id="faq">よくある質問</h2>
+        <div class="faq-list" id="faq-list">
+
+          <div class="faq-item">
+            <div class="faq-q">
+              <span>計算結果が給与明細と違う。なぜですか？</span>
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-a">
+              <p>本ツールは協会けんぽ（全国健康保険協会）の料率を使用した概算です。実際の計算とは以下の理由で差が生じます。</p>
+              <ul style="margin-top:8px;padding-left:18px;line-height:2;">
+                <li>組合健保に加入している場合は料率が異なります</li>
+                <li>住民税は前年所得に基づいて計算されます（ツールは当年年収で概算）</li>
+                <li>各種手当・非課税給与の扱いが異なる場合があります</li>
+                <li>端数処理の方法が異なる場合があります</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">
+              <span>パート・アルバイトの社会保険はどう計算されますか？</span>
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-a">
+              <p>従業員101人以上の企業に勤める場合、年収106万円以上で社会保険に加入義務があります（2024年10月から51人以上）。ツールでは「パート・アルバイト」を選択した場合、年収106万円未満は雇用保険のみで計算し、106万円以上は会社員と同等の社会保険で計算します。実際の加入状況は勤務先にご確認ください。</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">
+              <span>公務員の場合はどう入力すればよいですか？</span>
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-a">
+              <p>公務員は共済組合健保に加入しており、協会けんぽとは料率が異なります。ただし、大きな差はないためツールでは「会社員」として計算した結果を参考値としてご利用ください。正確な金額は給与明細または共済組合の資料をご確認ください。</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">
+              <span>ふるさと納税の上限はどう計算されますか？</span>
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-a">
+              <p>ふるさと納税の自己負担2,000円以外の控除上限額は「住民税所得割額×20%」が目安です。ツールでは計算した住民税額の20%を目安として表示しています。実際の上限は所得・家族構成・各種控除によって変わります。ふるさと納税サイト各社のシミュレーターで詳細を確認することをおすすめします。</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">
+              <span>年収の壁（103万・106万・130万円）の違いは？</span>
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-a">
+              <table class="data-table" style="margin-top:8px;">
+                <thead><tr><th>年収の壁</th><th>内容</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>103万円の壁</strong></td><td>所得税が発生し始めるライン。配偶者控除の対象外になる基準</td></tr>
+                  <tr><td><strong>106万円の壁</strong></td><td>パート・アルバイトが一定規模の企業で社会保険に加入する基準</td></tr>
+                  <tr><td><strong>130万円の壁</strong></td><td>扶養から外れ、自分で国民健康保険・国民年金に加入する基準</td></tr>
+                  <tr><td><strong>178万円の壁</strong></td><td>配偶者特別控除が完全になくなるライン</td></tr>
+                  <tr><td><strong>201万円の壁</strong></td><td>配偶者特別控除が段階的に減少し始めるライン</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">
+              <span>入力した情報は保存・送信されますか？</span>
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-a">
+              <p>いいえ。本ツールに入力した年収・家族構成などのデータはすべてお使いのブラウザ上でのみ処理され、サーバーへの送信は行いません。入力内容は個人情報として収集しません。</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">
+              <span>スマートフォンでも使えますか？</span>
+              <span class="faq-icon">+</span>
+            </div>
+            <div class="faq-a">
+              <p>はい。スマートフォン・タブレット・PCどの端末でもご利用いただけます。インターネット接続があれば動作します。</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 注意事項 -->
+      <div class="card" style="margin-top:16px;" id="caution">
+        <h2 class="section-title">ご利用上の注意</h2>
+        <div class="caution-box">
+          <strong>⚠️ 免責事項</strong>
+          <ul>
+            <li>計算結果はあくまで概算です。実際の手取り・税金・社会保険料と異なる場合があります</li>
+            <li>健康保険料は協会けんぽの料率を使用しています。組合健保・共済健保は別途料率が異なります</li>
+            <li>本ツールは税務・法律の専門的なアドバイスを提供するものではありません</li>
+            <li>正確な金額は勤務先の給与担当・税務署・税理士にご確認ください</li>
+            <li>本サービスの利用により生じた損害について、一切の責任を負いかねます</li>
+          </ul>
+        </div>
+      </div>
+
+    </main>
+
+    <div class="col-sidebar-right">
+      <div class="ad-slot ad-sidebar" aria-hidden="true">
+        <div class="ad-slot-inner"><span>広告</span><small>160×600</small></div>
+        <p class="ad-label">ADVERTISEMENT</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-ad-placeholder"></div>
+<div id="footer-placeholder"></div>
+
+<script src="js/common.js"></script>
+<script>
+/* FAQ アコーディオン */
+document.getElementById('faq-list').addEventListener('click', function (e) {
+  const q = e.target.closest('.faq-q');
+  if (!q) return;
+  const item = q.closest('.faq-item');
+  item.classList.toggle('open');
+});
+</script>
+</body>
+</html>
